@@ -1,0 +1,19 @@
+services:
+  bookshelf-db:
+    image: postgres:latest
+    restart: always
+    environment:
+        - POSTGRES_PASSWORD=securePassword123!
+        - POSTGRES_USER=bookshelf_db_user
+        - POSTGRES_DB=bookshelf_db
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ 'CMD', 'pg_ready', '-U', 'bookshelf_db_user', '-d', 'bookshelf_db' ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+        - bookshelf-db-data:/var/lib/postgresql/data
+volumes:
+  bookshelf-db-data:
