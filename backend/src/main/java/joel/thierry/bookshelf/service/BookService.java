@@ -24,7 +24,7 @@ public class BookService {
     }
 
     public List<BookDTO> getBooksByTitle(String title){
-        JsonNode jsonNode = googleBookService.getBooksByTitle(title);
+        JsonNode jsonNode = googleBookService.searchBooks(title);
         List<BookDTO> books = new ArrayList<>();
 
         if(jsonNode != null && jsonNode.has("items")){

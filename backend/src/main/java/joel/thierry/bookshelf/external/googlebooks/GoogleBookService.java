@@ -15,19 +15,18 @@ public class GoogleBookService {
         this.webClient = webClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
     }
 
-    public JsonNode getBooksByTitle(String title){
+    public JsonNode searchBooks(String query) {
         return webClient.get()
-                .uri("/volumes?q=intitle:" + title)
+                .uri("/volumes?q=" + query)
                 .retrieve()
                 .bodyToMono(JsonNode.class)
                 .block();
     }
-    public JsonNode getBooksByAuthor(String author){
+    public String searchBooksRaw(String query) {
         return webClient.get()
-                .uri("/volumes?q=inauthor:\"" + author + "\"")
+                .uri("/volumes?q=" + query)
                 .retrieve()
-                .bodyToMono(JsonNode.class)
+                .bodyToMono(String.class)
                 .block();
     }
-
 }
