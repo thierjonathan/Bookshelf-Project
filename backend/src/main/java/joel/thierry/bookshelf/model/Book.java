@@ -1,11 +1,33 @@
 package joel.thierry.bookshelf.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
-@Entity
+import java.awt.*;
+import java.util.List;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Book {
-    @Id
     private String id;
-    private String title;
+    private VolumeInfo volumeInfo;
+
+    @Data
+    public static class VolumeInfo {
+        private String title;
+        private List<String> authors;
+        private String description;
+        private int pageCount;
+        private double averageRating;
+        private ImageLinks imageLinks;
+        private String language;
+    }
+
+    @Data
+    public static class ImageLinks {
+        private String thumbnail;
+    }
+
 }

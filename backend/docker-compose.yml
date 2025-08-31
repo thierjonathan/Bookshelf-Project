@@ -1,19 +1,14 @@
 services:
-  bookshelf-db:
-    image: postgres:latest
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_container
     restart: always
-    environment:
-        - POSTGRES_PASSWORD=securePassword123!
-        - POSTGRES_USER=bookshelf_db_user
-        - POSTGRES_DB=bookshelf_db
     ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ 'CMD', 'pg_ready', '-U', 'bookshelf_db_user', '-d', 'bookshelf_db' ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpassword
     volumes:
-        - bookshelf-db-data:/var/lib/postgresql/data
+      - mongodb_data:/data/db
 volumes:
-  bookshelf-db-data:
+  mongodb_data:
