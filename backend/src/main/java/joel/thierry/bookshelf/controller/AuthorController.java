@@ -1,7 +1,7 @@
 package joel.thierry.bookshelf.controller;
 
 import joel.thierry.bookshelf.dto.BookDTO;
-import joel.thierry.bookshelf.model.BookPagination;
+import joel.thierry.bookshelf.model.Book;
 import joel.thierry.bookshelf.service.AuthorService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,11 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/author")
+@RequestMapping("library/author")
 public class AuthorController {
-    private final AuthorService authorService;
-    public AuthorController(AuthorService authorService){
-        this.authorService = authorService;
+    private AuthorService authorService;
+    public AuthorController(AuthorService authorService) {
+        this.authorService = authorService; //dependency injection
     }
 
     @GetMapping("/{name}")
@@ -25,6 +25,7 @@ public class AuthorController {
         authors = authorService.getAuthors(name);
         return authors;
     }
+
     @GetMapping("/{author}/books")
     public List<BookDTO> getBooksByAuthor(@PathVariable String author) {
         return authorService.getBooksByAuthor(author);
