@@ -9,11 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BookProgressRequest {
-    @NotBlank
+    @ValidUserId
     private String userId;
     @NotBlank
     private String bookId;
-    @NotNull
-    private BookProgress.Status status;
-    // getters and setters
+    private BookProgress.Status status = BookProgress.Status.WANT_TO_READ;
 }
