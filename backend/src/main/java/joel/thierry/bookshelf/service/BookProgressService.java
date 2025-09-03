@@ -1,6 +1,6 @@
 package joel.thierry.bookshelf.service;
 
-import joel.thierry.bookshelf.dto.validation.BookProgressRequest;
+import joel.thierry.bookshelf.dto.BookProgressRequest;
 import joel.thierry.bookshelf.model.BookProgress;
 import joel.thierry.bookshelf.repository.BookProgressRepository;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package joel.thierry.bookshelf.controller;
 
 import jakarta.validation.Valid;
-import joel.thierry.bookshelf.dto.validation.BookProgressRequest;
+import joel.thierry.bookshelf.dto.BookProgressRequest;
 import joel.thierry.bookshelf.model.BookProgress;
 import joel.thierry.bookshelf.service.BookProgressService;
 import org.springframework.web.bind.annotation.*;

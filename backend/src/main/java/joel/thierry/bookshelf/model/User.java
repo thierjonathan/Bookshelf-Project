@@ -19,10 +19,4 @@ public class User {
     private String username;
     private String password;
 
-    private List<String> favoriteBook = new ArrayList<>();
-    private List<String> favoriteAuthor = new ArrayList<>();
-
-    private List<String> wishlist = new ArrayList<>();
-    private List<String> currentlyReading = new ArrayList<>();
-    private List<String> doneReading = new ArrayList<>();
 }

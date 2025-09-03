@@ -27,15 +27,4 @@ public class Mapper {
         );
     }
 
-    public UserDTO convertToUserDTO(User user) {
-        return new UserDTO(
-                user.getUsername(),
-                user.getFavoriteBook(),
-                user.getFavoriteAuthor(),
-                user.getWishlist(),
-                user.getCurrentlyReading(),
-                user.getDoneReading()
-        );
-    }
-
 }
