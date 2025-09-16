@@ -6,30 +6,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import joel.thierry.bookshelf.dto.BookDTO;
 import joel.thierry.bookshelf.mapper.Mapper;
 import joel.thierry.bookshelf.model.Book;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 public class BookService {
     private final WebClient webClient;
     private final Mapper mapper;
     private final ObjectMapper jacksonObjectMapper;
+    private final String apiKey;
 
-    public BookService(WebClient.Builder webClientBuilder, Mapper mapper, ObjectMapper jacksonObjectMapper) {
+    public BookService(WebClient.Builder webClientBuilder, Mapper mapper, ObjectMapper jacksonObjectMapper, @Value("${GOOGLE_BOOK_API_KEY}") String apiKey) {
         this.webClient = webClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
         this.mapper = mapper;
         this.jacksonObjectMapper = jacksonObjectMapper;
+        this.apiKey = apiKey;
     }
 
     public List<BookDTO> getBooksByTitle(String title) {
-        String titleURL = "/volumes?q=intitle:" + title; // Wrap title in quotes
+        String encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8);
+        String titleURL = String.format("/volumes?q=intitle:%s&key=%s", encodedTitle, apiKey);
         List<BookDTO> bookDTO = new ArrayList<>();
 
         JsonNode jsonNode = webClient.get()

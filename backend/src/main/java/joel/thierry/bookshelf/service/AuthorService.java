@@ -1,3 +1,4 @@
+// backend/src/main/java/joel/thierry/bookshelf/service/AuthorService.java
 package joel.thierry.bookshelf.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -6,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import joel.thierry.bookshelf.dto.BookDTO;
 import joel.thierry.bookshelf.mapper.Mapper;
 import joel.thierry.bookshelf.model.Book;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -19,31 +21,33 @@ public class AuthorService {
     private final WebClient webClient;
     private final ObjectMapper jacksonObjectMapper;
     private final Mapper mapper;
+    private final String apiKey;
 
-    public AuthorService(WebClient.Builder webClientBuilder, Mapper mapper, ObjectMapper jacksonObjectMapper) {
+    public AuthorService(WebClient.Builder webClientBuilder, Mapper mapper, ObjectMapper jacksonObjectMapper,
+                         @Value("${GOOGLE_BOOK_API_KEY}") String apiKey) {
         this.webClient = webClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
         this.mapper = mapper;
         this.jacksonObjectMapper = jacksonObjectMapper;
+        this.apiKey = apiKey;
     }
 
     public List<String> getAuthors(String author) {
-        String authorURL = "/volumes?q=inauthor:\"" + author + "\""; // Wrap in quotes
+        String authorURL = "/volumes?q=inauthor:\"" + author + "\"&key=" + apiKey;
         return webClient.get()
                 .uri(authorURL)
                 .retrieve()
                 .bodyToMono(String.class)
                 .map(response -> this.extractAuthors(response, author))
                 .block();
-
     }
 
     public List<BookDTO> getBooksByAuthor(String author) {
-        String authorURL = "/volumes?q=inauthor:" + author;
+        String authorURL = "/volumes?q=inauthor:" + author + "&key=" + apiKey;
         List<BookDTO> bookDTOS = new ArrayList<>();
         JsonNode jsonNode =  webClient.get()
                 .uri(authorURL)
                 .retrieve()
-                .bodyToMono(JsonNode.class)//this prepares an empty container to be filled later
+                .bodyToMono(JsonNode.class)
                 .block();
 
         if(jsonNode != null && jsonNode.has("items")) {
@@ -89,5 +93,4 @@ public class AuthorService {
         }
         return authors;
     }
-
 }
