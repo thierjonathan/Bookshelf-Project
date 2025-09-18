@@ -53,9 +53,45 @@ public class AuthorService {
         if(jsonNode != null && jsonNode.has("items")) {
             for(JsonNode item : jsonNode.get("items")) {
                 try {
-                    Book book = jacksonObjectMapper.treeToValue(item, Book.class);
-                    bookDTOS.add(mapper.convertToBookDTO(book));
+                    JsonNode volumeInfo = item.get("volumeInfo");
+                    if(volumeInfo != null && volumeInfo.has("authors")) {
+                        boolean hasExactAuthor = StreamSupport.stream(volumeInfo.get("authors").spliterator(), false)
+                                .anyMatch(a -> a.asText().equalsIgnoreCase(author));
+                        if(hasExactAuthor) {
+                            Book book = jacksonObjectMapper.treeToValue(item, Book.class);
+                            bookDTOS.add(mapper.convertToBookDTO(book));
+                        }
+                    }
                 }catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return bookDTOS;
+    }
+
+    public List<BookDTO> searchBooksByAuthor(String query){
+        String authorURL = "/volumes?q=inauthor:" + query + "&key=" + apiKey;
+        List<BookDTO> bookDTOS = new ArrayList<>();
+        JsonNode jsonNode =  webClient.get()
+                .uri(authorURL)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        if (jsonNode != null && jsonNode.has("items")) {
+            for (JsonNode item : jsonNode.get("items")) {
+                try {
+                    JsonNode volumeInfo = item.get("volumeInfo");
+                    if (volumeInfo != null && volumeInfo.has("authors")) {
+                        boolean matches = StreamSupport.stream(volumeInfo.get("authors").spliterator(), false)
+                                .anyMatch(a -> a.asText().toLowerCase().contains(query.toLowerCase()));
+
+                        if (matches) {
+                            Book book = jacksonObjectMapper.treeToValue(item, Book.class);
+                            bookDTOS.add(mapper.convertToBookDTO(book));
+                        }
+                    }
+                } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
             }

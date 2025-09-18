@@ -58,4 +58,20 @@ public class BookService {
         }
         return bookDTO;
     }
+
+    public BookDTO getBookById(String bookId){
+        String url = "/volumes/" + bookId + "?key=" + apiKey;
+        JsonNode jsonNode = webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(JsonNode.class)
+                .block();
+        try {
+            Book book = jacksonObjectMapper.treeToValue(jsonNode, Book.class);
+            return mapper.convertToBookDTO(book);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }

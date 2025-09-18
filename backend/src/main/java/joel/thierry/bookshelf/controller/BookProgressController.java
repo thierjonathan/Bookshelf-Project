@@ -31,4 +31,8 @@ public class BookProgressController {
     public BookProgress getProgressById(@PathVariable String id) {
         return bookProgressService.getProgressById(id).orElse(null);
     }
+    @DeleteMapping("/{id}")
+    public void deleteProgress(@PathVariable String id){
+        bookProgressService.deleteProgress(id);
+    }
 }

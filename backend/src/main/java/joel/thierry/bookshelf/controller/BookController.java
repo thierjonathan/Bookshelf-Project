@@ -21,4 +21,9 @@ public class BookController {
         List<BookDTO> books = bookService.getBooksByTitle(title);
         return new BookPagination(books.size(), books);
     }
+    @GetMapping("/{id}/id")
+    public BookDTO getBooksByBookId(@PathVariable String id){
+        return bookService.getBookById(id);
+    }
+
 }

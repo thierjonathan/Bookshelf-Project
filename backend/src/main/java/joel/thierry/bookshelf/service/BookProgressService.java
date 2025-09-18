@@ -17,6 +17,10 @@ public class BookProgressService {
     }
 
     public BookProgress saveProgress(BookProgressRequest request) {
+        boolean exists = bookProgressRepository.findByUserIdAndBookId(request.getUserId(), request.getBookId()).isPresent();
+        if(exists){
+            throw new IllegalArgumentException("this user already has a progress for this book");
+        }
         BookProgress progress = new BookProgress(
                 null, // id will be generated
                 request.getUserId(),
@@ -35,5 +39,8 @@ public class BookProgressService {
 
     public Optional<BookProgress> getProgressById(String id) {
         return bookProgressRepository.findById(id);
+    }
+    public void deleteProgress(String id){
+        bookProgressRepository.deleteById(id);
     }
 }

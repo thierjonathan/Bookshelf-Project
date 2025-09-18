@@ -1,6 +1,5 @@
 package joel.thierry.bookshelf.model;
 
-import joel.thierry.bookshelf.dto.validation.ValidUserId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,11 +9,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "shelves")
-public class Shelf {
+@Document(collection = "shelfbook")
+public class ShelfBook {
     @Id
     private String id;
-    @ValidUserId
-    private String userId;
-    private String name;
+    private String shelfId;
+    private String bookId;
 }
