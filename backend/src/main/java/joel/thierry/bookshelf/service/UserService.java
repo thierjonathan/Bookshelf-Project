@@ -1,53 +1,29 @@
 package joel.thierry.bookshelf.service;
 
-import joel.thierry.bookshelf.mapper.Mapper;
-import joel.thierry.bookshelf.dto.BookDTO;
-import joel.thierry.bookshelf.model.Book;
+import joel.thierry.bookshelf.dto.RegisterRequest;
 import joel.thierry.bookshelf.model.User;
 import joel.thierry.bookshelf.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final WebClient webClient;
-    private final Mapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, WebClient.Builder webClientBuilder, Mapper mapper) {
+    public UserService(UserRepository userRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.webClient = webClientBuilder.baseUrl("https://www.googleapis.com/books/v1").build();
-        this.mapper = mapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
-    public User saveUser(User user) {
+    public User register(RegisterRequest req) {
+        if (userRepository.existsByUsername(req.getUsername())) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        User user = new User();
+        user.setUsername(req.getUsername());
+        user.setPassword(passwordEncoder.encode(req.getPassword()));
         return userRepository.save(user);
     }
-
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    public List<BookDTO> extractBooksfromList(List<String> bookIds){
-        List<BookDTO> books = new ArrayList<>();
-        for(String bookId : bookIds) {
-            String Url = "/volumes/" + bookId;
-            Book book = webClient.get()
-                    .uri(Url)
-                    .retrieve()
-                    .bodyToMono(Book.class)
-                    .block();
-
-            if(book != null) {
-                books.add(mapper.convertToBookDTO(book));
-            }
-
-        }
-        return books;
-    }
-
 }

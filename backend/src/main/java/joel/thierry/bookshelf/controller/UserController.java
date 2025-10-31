@@ -18,9 +18,10 @@ public class UserController {
     public UserController(UserService userService, Mapper mapper) {
         this.userService = userService;
     }
-
+    /***
     @PostMapping("/register")
     public ResponseEntity<User> registerUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.saveUser(user));
     }
+    ***/
 }

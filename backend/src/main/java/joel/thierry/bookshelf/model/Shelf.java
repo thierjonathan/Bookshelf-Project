@@ -17,4 +17,5 @@ public class Shelf {
     @ValidUserId
     private String userId;
     private String name;
+    private boolean exclusive = false;
 }
