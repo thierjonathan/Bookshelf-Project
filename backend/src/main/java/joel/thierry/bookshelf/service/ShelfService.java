@@ -1,15 +1,65 @@
 package joel.thierry.bookshelf.service;
 
 import joel.thierry.bookshelf.model.Shelf;
+import joel.thierry.bookshelf.model.ShelfBook;
+import joel.thierry.bookshelf.repository.ShelfBookRepository;
 import joel.thierry.bookshelf.repository.ShelfRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
 public class ShelfService {
-    private final ShelfRepository shelfRepository;
 
-    public ShelfService(ShelfRepository shelfRepository) {
+    private final ShelfRepository shelfRepository;
+    private final ShelfBookRepository shelfBookRepository;
+
+    public ShelfService(ShelfRepository shelfRepository, ShelfBookRepository shelfBookRepository) {
         this.shelfRepository = shelfRepository;
+        this.shelfBookRepository = shelfBookRepository;
     }
-    public void createShelf(Shelf shelf){
-        shelfRepository.save(shelf);
+
+    public Shelf createShelf(Shelf shelf) {
+        // optionally validate user etc.
+        return shelfRepository.save(shelf);
+    }
+
+    @Transactional
+    public void addBookToShelf(String userId, String shelfId, String bookId) {
+        Shelf shelf = shelfRepository.findByIdAndUserId(shelfId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("Shelf not found for user"));
+
+        if (shelf.isExclusive()) {
+            List<Shelf> exclusiveShelves = shelfRepository.findByUserIdAndExclusiveTrue(userId);
+            List<String> otherExclusiveShelfIds = exclusiveShelves.stream()
+                    .map(Shelf::getId)
+                    .filter(id -> !id.equals(shelfId))
+                    .collect(Collectors.toList());
+
+            if (!otherExclusiveShelfIds.isEmpty()) {
+                shelfBookRepository.deleteByUserIdAndBookIdAndShelfIdIn(userId, bookId, otherExclusiveShelfIds);
+            }
+        }
+
+        boolean already = shelfBookRepository.existsByUserIdAndBookIdAndShelfId(userId, bookId, shelfId);
+        if (!already) {
+            ShelfBook sb = new ShelfBook();
+            sb.setShelfId(shelfId);
+            sb.setBookId(bookId);
+            sb.setUserId(userId);
+            shelfBookRepository.save(sb);
+        }
+    }
+
+    public void removeBookFromShelf(String userId, String shelfId, String bookId) {
+        List<ShelfBook> current = shelfBookRepository.findByUserIdAndBookId(userId, bookId);
+        for (ShelfBook sb : current) {
+            if (sb.getShelfId().equals(shelfId)) {
+                shelfBookRepository.delete(sb);
+                return;
+            }
+        }
     }
 }

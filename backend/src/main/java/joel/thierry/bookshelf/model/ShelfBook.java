@@ -15,4 +15,5 @@ public class ShelfBook {
     private String id;
     private String shelfId;
     private String bookId;
+    private String userId;
 }
