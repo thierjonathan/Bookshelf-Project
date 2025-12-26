@@ -22,7 +22,6 @@ public class ShelfService {
     }
 
     public Shelf createShelf(Shelf shelf) {
-        // optionally validate user etc.
         return shelfRepository.save(shelf);
     }
 

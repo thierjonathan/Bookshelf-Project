@@ -2,6 +2,7 @@ package joel.thierry.bookshelf.dto.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import joel.thierry.bookshelf.service.UserService;
 import org.springframework.stereotype.Component;
 import joel.thierry.bookshelf.repository.UserRepository; // adjust if needed
 
@@ -17,6 +18,6 @@ public class ValidUserIdValidator implements ConstraintValidator<ValidUserId, St
         if (userId == null || userId.isBlank()) {
             return false;
         }
-        return userRepository.existsById(userId); // Checks if user exists
+        return userRepository.existsById(userId);
     }
 }
