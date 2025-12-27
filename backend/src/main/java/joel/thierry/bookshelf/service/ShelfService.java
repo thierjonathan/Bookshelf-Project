@@ -6,6 +6,7 @@ import joel.thierry.bookshelf.repository.ShelfBookRepository;
 import joel.thierry.bookshelf.repository.ShelfRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import joel.thierry.bookshelf.service.UserService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,13 +16,23 @@ public class ShelfService {
 
     private final ShelfRepository shelfRepository;
     private final ShelfBookRepository shelfBookRepository;
+    private final UserService userService;
 
-    public ShelfService(ShelfRepository shelfRepository, ShelfBookRepository shelfBookRepository) {
+
+    public ShelfService(ShelfRepository shelfRepository, ShelfBookRepository shelfBookRepository, UserService userService) {
         this.shelfRepository = shelfRepository;
         this.shelfBookRepository = shelfBookRepository;
+        this.userService = userService;
     }
 
-    public Shelf createShelf(Shelf shelf) {
+    public Shelf createShelf(String username, Shelf shelf) {
+        // Get userId from username
+        String userId = userService.getUserIdByUsername(username);
+
+        // Set userId in Shelf
+        shelf.setUserId(userId);
+
+        // Save the shelf in the repository
         return shelfRepository.save(shelf);
     }
 

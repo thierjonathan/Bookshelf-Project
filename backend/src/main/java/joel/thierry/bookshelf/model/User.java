@@ -1,24 +1,21 @@
 package joel.thierry.bookshelf.model;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-@Document(collection = "users")
+@Document(collection = "users") // Mongo users collection
 public class User {
+
     @Id
-    private String id;
-    @NotNull
+    private String id; // MongoDB auto `_id`
+
+    @Indexed(unique = true)  // <-- Enforces unique usernames
     private String username;
-    @NotNull
-    private String password;
+
+    private String password; // For example only; use password hashing
 }

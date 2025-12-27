@@ -4,6 +4,7 @@ import joel.thierry.bookshelf.dto.*;
 import joel.thierry.bookshelf.model.User;
 import joel.thierry.bookshelf.security.JwtUtil;
 import joel.thierry.bookshelf.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -28,8 +29,12 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Validated @RequestBody RegisterRequest req) {
-        User user = userService.register(req);
-        return ResponseEntity.ok().build();
+        try {
+            User user = userService.register(req);
+            return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        }catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        }
     }
 
     @PostMapping("/login")

@@ -15,20 +15,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Controller for shelf management and adding/removing books from shelves.
- *
- * Notes:
- * - This controller assumes the authenticated principal's username is the application userId.
- *   If your User id is different from username, adapt how you resolve the current user's id.
- * - Endpoints:
- *   POST   /shelves                -> create a new shelf (owner is taken from authenticated user)
- *   GET    /shelves                -> list shelves for current user
- *   GET    /shelves/{shelfId}      -> get a shelf (must belong to current user)
- *   POST   /shelves/{shelfId}/books/{bookId} -> add book to shelf (enforces exclusivity)
- *   DELETE /shelves/{shelfId}/books/{bookId} -> remove book from shelf
- *   GET    /shelves/{shelfId}/books -> list ShelfBook entries for shelf (optional convenience)
- */
 @RestController
 @RequestMapping("/shelves")
 @Validated
@@ -49,10 +35,13 @@ public class ShelfController {
     @PostMapping
     public ResponseEntity<?> createShelf(@RequestBody Shelf shelf,
                                          @AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
-        shelf.setUserId(userId);
-        Shelf created = shelfService.createShelf(shelf);
-        // Return 201 Created with Location header
+        // Extract username from authenticated user
+        String username = userDetails.getUsername();
+
+        // Delegate shelf creation to the service
+        Shelf created = shelfService.createShelf(username, shelf);
+
+        // Return the created Shelf resource with Location header
         return ResponseEntity.created(URI.create("/shelves/" + created.getId())).body(created);
     }
 
