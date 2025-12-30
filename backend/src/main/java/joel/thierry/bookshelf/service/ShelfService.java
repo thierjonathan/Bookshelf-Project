@@ -37,7 +37,8 @@ public class ShelfService {
     }
 
     @Transactional
-    public void addBookToShelf(String userId, String shelfId, String bookId) {
+    public void addBookToShelf(String username, String shelfId, String bookId) {
+        String userId = userService.getUserIdByUsername(username);
         Shelf shelf = shelfRepository.findByIdAndUserId(shelfId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("Shelf not found for user"));
 
@@ -71,5 +72,9 @@ public class ShelfService {
                 return;
             }
         }
+    }
+    public List<Shelf> getShelvesForUser(String userId) {
+        // Query all shelves for the given userId
+        return shelfRepository.findByUserId(userId);
     }
 }

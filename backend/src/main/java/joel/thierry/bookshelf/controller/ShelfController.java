@@ -5,6 +5,7 @@ import joel.thierry.bookshelf.model.ShelfBook;
 import joel.thierry.bookshelf.service.ShelfService;
 import joel.thierry.bookshelf.repository.ShelfBookRepository;
 import joel.thierry.bookshelf.repository.ShelfRepository;
+import joel.thierry.bookshelf.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,12 +22,15 @@ import java.util.Optional;
 public class ShelfController {
 
     private final ShelfService shelfService;
+    private final UserService userService;
     private final ShelfRepository shelfRepository;
     private final ShelfBookRepository shelfBookRepository;
 
     public ShelfController(ShelfService shelfService,
                            ShelfRepository shelfRepository,
-                           ShelfBookRepository shelfBookRepository) {
+                           ShelfBookRepository shelfBookRepository,
+                           UserService userService) {
+        this.userService = userService;
         this.shelfService = shelfService;
         this.shelfRepository = shelfRepository;
         this.shelfBookRepository = shelfBookRepository;
@@ -37,25 +41,24 @@ public class ShelfController {
                                          @AuthenticationPrincipal UserDetails userDetails) {
         // Extract username from authenticated user
         String username = userDetails.getUsername();
-
-        // Delegate shelf creation to the service
         Shelf created = shelfService.createShelf(username, shelf);
-
-        // Return the created Shelf resource with Location header
         return ResponseEntity.created(URI.create("/shelves/" + created.getId())).body(created);
     }
 
+    // New method to get all shelves for the logged-in user
     @GetMapping
-    public ResponseEntity<List<Shelf>> listShelves(@AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
-        List<Shelf> shelves = shelfRepository.findByUserId(userId);
+    public ResponseEntity<List<Shelf>> getAllShelvesForUser(@AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        String userId = userService.getUserIdByUsername(username);
+        List<Shelf> shelves = shelfService.getShelvesForUser(userId);
         return ResponseEntity.ok(shelves);
     }
 
     @GetMapping("/{shelfId}")
     public ResponseEntity<Shelf> getShelf(@PathVariable String shelfId,
                                           @AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
+        String username = userDetails.getUsername();
+        String userId = userService.getUserIdByUsername(username);
         Optional<Shelf> s = shelfRepository.findByIdAndUserId(shelfId, userId);
         return s.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -64,9 +67,9 @@ public class ShelfController {
     public ResponseEntity<?> addBookToShelf(@PathVariable String shelfId,
                                             @PathVariable String bookId,
                                             @AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
+        String username = userDetails.getUsername();
         try {
-            shelfService.addBookToShelf(userId, shelfId, bookId);
+            shelfService.addBookToShelf(username, shelfId, bookId);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest().body(ex.getMessage());
@@ -77,8 +80,8 @@ public class ShelfController {
     public ResponseEntity<?> removeBookFromShelf(@PathVariable String shelfId,
                                                  @PathVariable String bookId,
                                                  @AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
-        // Optional: validate shelf belongs to user before attempt (returns 404 if not)
+        String username = userDetails.getUsername();
+        String userId = userService.getUserIdByUsername(username);
         Optional<Shelf> shelf = shelfRepository.findByIdAndUserId(shelfId, userId);
         if (shelf.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -90,7 +93,8 @@ public class ShelfController {
     @GetMapping("/{shelfId}/books")
     public ResponseEntity<List<ShelfBook>> listBooksOnShelf(@PathVariable String shelfId,
                                                             @AuthenticationPrincipal UserDetails userDetails) {
-        String userId = userDetails.getUsername();
+        String username = userDetails.getUsername();
+        String userId = userService.getUserIdByUsername(username);
         Optional<Shelf> shelf = shelfRepository.findByIdAndUserId(shelfId, userId);
         if (shelf.isEmpty()) {
             return ResponseEntity.notFound().build();

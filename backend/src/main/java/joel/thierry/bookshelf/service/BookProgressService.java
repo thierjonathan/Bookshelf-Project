@@ -16,18 +16,31 @@ public class BookProgressService {
         this.bookProgressRepository = bookProgressRepository;
     }
 
-    public BookProgress saveProgress(BookProgressRequest request) {
-        boolean exists = bookProgressRepository.findByUserIdAndBookId(request.getUserId(), request.getBookId()).isPresent();
-        if(exists){
-            throw new IllegalArgumentException("this user already has a progress for this book");
+    public BookProgress saveProgress(BookProgressRequest request, String authenticatedUserId) {
+        // Ensure the progress being created is for the authenticated user
+        if (!request.getUserId().equals(authenticatedUserId)) {
+            throw new SecurityException("Cannot create progress for another user!");
         }
-        BookProgress progress = new BookProgress(
-                null, // id will be generated
-                request.getUserId(),
-                request.getBookId(),
-                request.getStatus()
+
+        Optional<BookProgress> existingProgress = bookProgressRepository.findByUserIdAndBookId(
+                authenticatedUserId, request.getBookId()
         );
-        return bookProgressRepository.save(progress);
+
+        if (existingProgress.isPresent()) {
+            // Update existing progress
+            BookProgress progress = existingProgress.get();
+            progress.setStatus(request.getStatus()); // Update status
+            return bookProgressRepository.save(progress);
+        } else {
+            // Create new progress for the authenticated user
+            BookProgress progress = new BookProgress(
+                    null,
+                    authenticatedUserId,
+                    request.getBookId(),
+                    request.getStatus()
+            );
+            return bookProgressRepository.save(progress);
+        }
     }
 
     public List<BookProgress> getProgressByUser(String userId) {
